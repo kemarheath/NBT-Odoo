@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: odoo
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    volumes:
+      - odoo_db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile  # use the custom Dockerfile you’ve already prepared
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+      - "8071:8071"
+      - "8072:8072"
+    volumes:
+      - odoo_filestore:/var/lib/odoo
+      - ./extra-addons:/mnt/extra-addons  # your local dev addons
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    restart: unless-stopped
+
+volumes:
+  odoo_db_data:
+  odoo_filestore:
